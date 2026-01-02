@@ -1,4 +1,3 @@
--- invscan.lua: 掃描容器與計數物品
 invscan = {}
 
 function invscan.getInventories()
