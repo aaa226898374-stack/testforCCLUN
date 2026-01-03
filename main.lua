@@ -1,6 +1,8 @@
 dofile("invscan.lua")
 dofile("rules.lua")
 
+rednet.open("back")
+
 local invs = invscan.getInventories()
 print("Found " .. #invs .. " inventories")
 
