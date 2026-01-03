@@ -13,7 +13,7 @@ shell.run("wget", base .. "Receiver/ReceiverMain.lua", "ReceiverMain.lua")
 shell.run("wget", base .. "Receiver/startup.lua", "startup.lua")
 shell.run("wget", base .. "Rules/" .. profile .. ".lua", "Rules/" .. profile .. ".lua")
 
-local tools = {"reset.lua", "id.lua"}
+local tools = {"reset.lua", "id.lua", "scan.lua", "scanall.lua"}
 for _, t in ipairs(tools) do
     shell.run("wget", base .. "Tools/" .. t, "Tools/" .. t)
 end
