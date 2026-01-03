@@ -16,7 +16,7 @@ local cfgContent = string.format([[
 return {
   RuleProfile = "%s",
   Net = { Protocol = "stock" },
-  Self = { ModemSide = "top" }, -- 預設 top，可自行修改
+  Self = { ModemSide = "top" },
 }
 ]], profile)
 
