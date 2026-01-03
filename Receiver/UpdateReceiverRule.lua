@@ -1,40 +1,17 @@
-local cfg = dofile("ReceiverConfig.lua")
+local base = "https://raw.githubusercontent.com/aaa226898374-stack/testforCCLUN/main/"
+local profile = ...
+
+if not profile then
+  local cfg = dofile("ReceiverConfig.lua")
+  profile = cfg.RuleProfile
+end
 
 if not fs.exists("ReceiverRules") then fs.makeDir("ReceiverRules") end
 
-local rulePath = fs.combine("ReceiverRules", cfg.RuleProfile .. ".lua")
-if not fs.exists(rulePath) then
-  print("Rule not found: " .. rulePath)
-  print("Run: UpdateReceiverRule")
-  return
-end
+local target = fs.combine("ReceiverRules", profile .. ".lua")
+if fs.exists(target) then fs.delete(target) end
 
-local rules = dofile(rulePath)
+shell.run("wget", base .. "ReceiverRules/" .. profile .. ".lua", target)
 
-rednet.open(cfg.Self.ModemSide)
-rednet.host(cfg.Net.Protocol, cfg.Self.HostName)
-
-local function applyOutputs(outputs, on)
-  for _, o in ipairs(outputs or {}) do
-    redstone.setOutput(o.Side, on and true or false)
-  end
-end
-
-print("Receiver: " .. cfg.Self.HostName)
-
-while true do
-  local from, msg = rednet.receive(cfg.Net.Protocol)
-  if type(msg) == "table" and type(msg.Op) == "string" and type(msg.Resource) == "string" then
-    local rule = rules.PutRules[msg.Resource]
-    if rule then
-      if msg.Op == "GET" then
-        applyOutputs(rule.Outputs, true)
-        print("ON: " .. msg.Resource)
-      elseif msg.Op == "PUT" then
-        applyOutputs(rule.Outputs, false)
-        print("OFF: " .. msg.Resource)
-      end
-    end
-  end
-end
-
+print("Rule updated: " .. profile)
+print("Restart to apply")
