@@ -12,7 +12,7 @@ for _, file in ipairs(files) do
 end
 
 if not fs.exists("Tools") then fs.makeDir("Tools") end
-local tools = {"reset.lua", "scan.lua", "id.lua"}
+local tools = {"reset.lua", "scan.lua", "id.lua", "scanall.lua"}
 
 for _, t in ipairs(tools) do
     local path = "Tools/" .. t
