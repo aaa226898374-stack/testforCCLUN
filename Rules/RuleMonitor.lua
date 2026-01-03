@@ -1,6 +1,8 @@
 return {
   Net = { Protocol = "stock" },
-  Scan = { Prefix = "functionalstorage:", Interval = 2 },
+  Scan = { Prefix = "functionalstorage:", Interval = 0.5 },
+
+  DisplayMonitorID = "monitor_0", 
 
   GetRules = {
     {
@@ -9,9 +11,9 @@ return {
       TargetID = 15,
     },
     {
-      Resource = "minecraft:coal",
-      Low = 128,
-      TargetID = 16,
+      Resource = "ftbmaterials:iron_plate",
+      Low = 256,
+      TargetID = 15,
     },
   }
 }
