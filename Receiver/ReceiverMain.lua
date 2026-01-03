@@ -9,9 +9,7 @@ else
   print("Receiver ID: " .. os.getComputerID())
 end
 
-if not fs.exists("Rules") then fs.makeDir("Rules") end
 local rulePath = "Rules/" .. cfg.RuleProfile .. ".lua"
-
 if not fs.exists(rulePath) then
   print("Rule not found: " .. rulePath)
   return
