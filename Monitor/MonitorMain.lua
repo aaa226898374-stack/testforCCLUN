@@ -23,8 +23,12 @@ local function getInventories()
   end
   return invs
 end
+
 local Inventories = getInventories()
+print("Monitoring " .. #Inventories .. " inventories")
+
 local Active = {}
+
 local function countResource(resource)
   local total = 0
   for _, inv in ipairs(Inventories) do
