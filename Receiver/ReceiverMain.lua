@@ -6,15 +6,14 @@ if not modem then
   return
 else
   rednet.open(peripheral.getName(modem))
-  print("Receiver started on ID: " .. os.getComputerID())
+  print("Receiver ID: " .. os.getComputerID())
 end
 
-if not fs.exists("ReceiverRules") then fs.makeDir("ReceiverRules") end
+if not fs.exists("Rules") then fs.makeDir("Rules") end
+local rulePath = "Rules/" .. cfg.RuleProfile .. ".lua"
 
-local rulePath = fs.combine("ReceiverRules", cfg.RuleProfile .. ".lua")
 if not fs.exists(rulePath) then
   print("Rule not found: " .. rulePath)
-  print("Run: UpdateReceiverRule")
   return
 end
 
@@ -29,16 +28,12 @@ end
 
 while true do
   local senderId, msg = rednet.receive(cfg.Net.Protocol)
-  
-  if type(msg) == "table" and type(msg.Op) == "string" and type(msg.Resource) == "string" then
+  if type(msg) == "table" and type(msg.Op) == "string" then
     print("CMD from " .. senderId .. ": " .. msg.Op .. " " .. msg.Resource)
-    
     local rule = rules.PutRules[msg.Resource]
     if rule then
-      if msg.Op == "GET" then
-        applyOutputs(rule.Outputs, true)
-      elseif msg.Op == "PUT" then
-        applyOutputs(rule.Outputs, false)
+      if msg.Op == "GET" then applyOutputs(rule.Outputs, true)
+      elseif msg.Op == "PUT" then applyOutputs(rule.Outputs, false)
       end
     else
       print("Unknown resource: " .. msg.Resource)
