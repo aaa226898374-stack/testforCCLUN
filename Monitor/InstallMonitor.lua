@@ -6,7 +6,7 @@ if not fs.exists("Tools") then fs.makeDir("Tools") end
 shell.run("wget", base .. "Monitor/MonitorMain.lua", "MonitorMain.lua")
 shell.run("wget", base .. "Rules/RuleMonitor.lua", "Rules/RuleMonitor.lua")
 
-local tools = {"reset.lua", "scan.lua", "id.lua"}
+local tools = {"reset.lua", "scan.lua", "id.lua", "scanall.lua"}
 for _, t in ipairs(tools) do
     shell.run("wget", base .. "Tools/" .. t, "Tools/" .. t)
 end
