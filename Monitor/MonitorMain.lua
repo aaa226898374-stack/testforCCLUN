@@ -1,12 +1,16 @@
-local Cfg = dofile("MonitorRules.lua")
+local rulePath = "Rules/RuleMonitor.lua"
+if not fs.exists(rulePath) then
+    error("Config not found: " .. rulePath)
+end
+local Cfg = dofile(rulePath)
 
 local modem = peripheral.find("modem")
 if not modem then
-  print("Error: No modem found attached.")
+  print("Error: No modem found.")
   return
 else
   rednet.open(peripheral.getName(modem))
-  print("Network opened on: " .. peripheral.getName(modem))
+  print("Monitor Network: " .. peripheral.getName(modem))
 end
 
 local function getInventories()
@@ -19,12 +23,8 @@ local function getInventories()
   end
   return invs
 end
-
 local Inventories = getInventories()
-print("Monitoring " .. #Inventories .. " inventories")
-
 local Active = {}
-
 local function countResource(resource)
   local total = 0
   for _, inv in ipairs(Inventories) do
@@ -45,7 +45,7 @@ while true do
 
   for _, r in ipairs(Cfg.GetRules) do
     local n = countResource(r.Resource)
-    local key = r.Resource .. "@" .. r.TargetID 
+    local key = r.Resource .. "@" .. r.TargetID
 
     if n < r.Low then
       if not Active[key] then
