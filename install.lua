@@ -6,6 +6,8 @@ local files = {
   "actions.lua",
   "receiver.lua",
   "startup.lua",
+  "scan.lua",
+  "scanall.lua",
 }
 
 for _, f in ipairs(files) do
