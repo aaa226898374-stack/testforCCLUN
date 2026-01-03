@@ -1,11 +1,13 @@
 local Cfg = dofile("MonitorRules.lua")
 
-if not peripheral.find("modem", rednet.open) then
-  print("Error: No modem found on side: " .. (Cfg.Self.ModemSide or "any"))
+local modem = peripheral.find("modem")
+if not modem then
+  print("Error: No modem found attached.")
   return
+else
+  rednet.open(peripheral.getName(modem))
+  print("Network opened on: " .. peripheral.getName(modem))
 end
-
-print("Monitor started on protocol: " .. Cfg.Net.Protocol)
 
 local function getInventories()
   local invs = {}
@@ -38,43 +40,25 @@ local function countResource(resource)
   return total
 end
 
-local function sendRequest(targetHost, op, resource)
-  local id = rednet.lookup(Cfg.Net.Protocol, targetHost)
-  
-  if id then
-    print("SEND -> " .. targetHost .. " (ID:" .. id .. "): " .. op)
-    rednet.send(id, { Op = op, Resource = resource }, Cfg.Net.Protocol)
-  else
-    local numId = tonumber(targetHost)
-    if numId then
-        print("SEND -> ID:" .. numId .. " (Direct): " .. op)
-        rednet.send(numId, { Op = op, Resource = resource }, Cfg.Net.Protocol)
-    else
-        print("WARN: Host '" .. targetHost .. "' not found. Broadcasting...")
-        rednet.broadcast({ Op = op, Resource = resource, TargetName = targetHost }, Cfg.Net.Protocol)
-    end
-  end
-end
-
 while true do
-  if #Inventories == 0 then
-      Inventories = getInventories()
-  end
+  if #Inventories == 0 then Inventories = getInventories() end
 
   for _, r in ipairs(Cfg.GetRules) do
     local n = countResource(r.Resource)
-    local key = r.Resource .. "@" .. r.TargetHost
+    local key = r.Resource .. "@" .. r.TargetID 
 
     if n < r.Low then
       if not Active[key] then
         print("\n[LOW] " .. r.Resource .. " (" .. n .. " < " .. r.Low .. ")")
-        sendRequest(r.TargetHost, "GET", r.Resource)
+        print("SEND -> ID:" .. r.TargetID .. " [GET]")
+        rednet.send(r.TargetID, { Op = "GET", Resource = r.Resource }, Cfg.Net.Protocol)
         Active[key] = true
       end
     else
       if Active[key] then
         print("\n[OK] " .. r.Resource .. " Replenished.")
-        sendRequest(r.TargetHost, "PUT", r.Resource)
+        print("SEND -> ID:" .. r.TargetID .. " [PUT]")
+        rednet.send(r.TargetID, { Op = "PUT", Resource = r.Resource }, Cfg.Net.Protocol)
         Active[key] = false
       end
     end
