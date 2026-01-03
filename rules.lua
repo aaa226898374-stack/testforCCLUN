@@ -1,4 +1,3 @@
--- rules.lua (監控電腦)
 dofile("actions.lua")
 
 rules = {
