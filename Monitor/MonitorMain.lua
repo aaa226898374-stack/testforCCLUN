@@ -5,16 +5,39 @@ local Cfg = dofile(rulePath)
 local modem = peripheral.find("modem")
 if modem then rednet.open(peripheral.getName(modem)) end
 
-print("Initializing inventories...")
+local output = term
+if Cfg.DisplayMonitorID then
+    for _, name in ipairs(peripheral.getNames()) do
+        if peripheral.getType(name) == "monitor" then
+            if name == Cfg.DisplayMonitorID then
+                output = peripheral.wrap(name)
+                output.setTextScale(0.5)
+                break
+            end
+        end
+    end
+end
+
+output.clear()
+output.setCursorPos(1,1)
+output.write("Init inventories...")
+
 local Inventories = {}
 for _, name in ipairs(peripheral.getNames()) do
   if string.find(name, Cfg.Scan.Prefix) then
     table.insert(Inventories, peripheral.wrap(name))
   end
 end
-print("Monitoring " .. #Inventories .. " inventories.")
+output.setCursorPos(1,2)
+output.write("Monitoring " .. #Inventories .. " invs.")
 
 local Active = {}
+local logHistory = {} 
+
+local function addLog(msg)
+    table.insert(logHistory, 1, os.time() .. " " .. msg)
+    if #logHistory > 10 then table.remove(logHistory) end
+end
 
 while true do
   local counts = {}
@@ -28,34 +51,37 @@ while true do
     end
   end
 
-  local startY = 3 
   for i, r in ipairs(Cfg.GetRules) do
-    local currentAmount = counts[r.Resource] or 0
+    local current = counts[r.Resource] or 0
     local key = r.Resource .. "@" .. r.TargetID
+    
+    output.setCursorPos(1, 3 + i)
+    output.clearLine()
+    local status = Active[key] and "[ON ]" or "[OFF]"
+    output.write(status .. " " .. r.Resource .. ": " .. current .. "/" .. r.Low)
 
-    term.setCursorPos(1, startY + i)
-    term.clearLine()
-    term.write(r.Resource .. ": " .. currentAmount .. " / " .. r.Low)
-
-    if currentAmount < r.Low then
+    if current < r.Low then
       if not Active[key] then
-        local x, y = term.getCursorPos()
-        term.setCursorPos(1, 15) 
-        print("[LOW] " .. r.Resource .. " -> ID:" .. r.TargetID)
+        addLog("[LOW] " .. r.Resource)
         rednet.send(r.TargetID, { Op = "GET", Resource = r.Resource }, Cfg.Net.Protocol)
         Active[key] = true
-        term.setCursorPos(x, y)
       end
     else
       if Active[key] then
-        local x, y = term.getCursorPos()
-        term.setCursorPos(1, 15)
-        print("[OK] " .. r.Resource .. " Replenished.")
+        addLog("[OK ] " .. r.Resource)
         rednet.send(r.TargetID, { Op = "PUT", Resource = r.Resource }, Cfg.Net.Protocol)
         Active[key] = false
-        term.setCursorPos(x, y)
       end
     end
+  end
+
+  local logStart = 5 + #Cfg.GetRules
+  output.setCursorPos(1, logStart)
+  output.write("--- Event Log ---")
+  for i, msg in ipairs(logHistory) do
+      output.setCursorPos(1, logStart + i)
+      output.clearLine()
+      output.write(msg)
   end
   
   sleep(Cfg.Scan.Interval or 0.5)
